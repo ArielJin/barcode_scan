@@ -4,35 +4,122 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
-import com.google.zxing.BarcodeFormat
+import android.view.Window
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.apptreesoftware.barcodescan.utils.StatusBarUtil
+import com.apptreesoftware.barcodescan.widgets.AutoClickImageView
+import com.apptreesoftware.barcodescan.widgets.AutoClickTextView
+import com.google.android.material.appbar.AppBarLayout
 import com.google.zxing.Result
+import com.yourcompany.barcodescan.R
 import me.dm7.barcodescanner.zxing.ZXingScannerView
-import java.lang.reflect.Field
+import java.lang.Exception
 
 
 class BarcodeScannerActivity : Activity(), ZXingScannerView.ResultHandler {
 
-    lateinit var scannerView: me.dm7.barcodescanner.zxing.ZXingScannerView
+    lateinit var scannerView: ZXingScannerView
 
     companion object {
+        val KEY_APPBAR_COLOR = "KEY_APPBAR_COLOR"
         val REQUEST_TAKE_PHOTO_CAMERA_PERMISSION = 100
         val TOGGLE_FLASH = 200
 
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        var appBarColor = intent.getStringExtra(KEY_APPBAR_COLOR)//FFF5BC8B
+        try {
+            StatusBarUtil.initWindowsStatusBar(this, Color.parseColor(appBarColor))
+        }catch (e: Exception) {
+            appBarColor = "#FF000000"
+            StatusBarUtil.initWindowsStatusBar(this, Color.parseColor(appBarColor))
+        }
         super.onCreate(savedInstanceState)
         title = ""
         scannerView = ZXingScannerView(this)
         scannerView.setAutoFocus(true)
         // this paramter will make your HUAWEI phone works great!
         scannerView.setAspectTolerance(0.5f)
-        setContentView(scannerView)
+
+        val  cl = ConstraintLayout(this)
+        cl.layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT)
+
+        val appBarLayout = AppBarLayout(this)
+        
+        
+        val appBarLayoutLp = AppBarLayout.LayoutParams(AppBarLayout.LayoutParams.MATCH_PARENT, resources.getDimensionPixelSize(R.dimen.app_dp_54))
+        appBarLayout.layoutParams = appBarLayoutLp
+        appBarLayout.id = R.id.scan_bar
+
+        appBarLayout.setBackgroundColor(Color.parseColor(appBarColor))
+
+        val appBarContentCl = ConstraintLayout(this)
+        appBarContentCl.layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, resources.getDimensionPixelSize(R.dimen.app_dp_54))
+
+        val leftIcon = AutoClickImageView(this)
+        leftIcon.setImageResource(R.mipmap.ic_back_white)
+        leftIcon.setPadding(resources.getDimensionPixelSize(R.dimen.app_dp_8), resources.getDimensionPixelSize(R.dimen.app_dp_6), 0, resources.getDimensionPixelSize(R.dimen.app_dp_6))
+        val leftIconLp = ConstraintLayout.LayoutParams(resources.getDimensionPixelSize(R.dimen.app_dp_38), ConstraintLayout.LayoutParams.MATCH_PARENT)
+        leftIconLp.leftToLeft = ConstraintLayout.LayoutParams.PARENT_ID
+        leftIconLp.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+        leftIconLp.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
+//        leftIconLp.setMargins(getResources().getDimensionPixelSize(R.dimen.app_dp_8), 0, 0, 0);
+        leftIcon.setOnClickListener { 
+            this.finish()
+        }
+
+        leftIcon.layoutParams = leftIconLp
+        
+        val  rightText = AutoClickTextView(this)
+        rightText.text = "开灯"
+        rightText.setTextColor(Color.WHITE)
+        rightText.gravity = Gravity.CENTER
+        rightText.setPadding(resources.getDimensionPixelSize(R.dimen.app_dp_20), 0 ,resources.getDimensionPixelSize(R.dimen.app_dp_20), 0)
+        rightText.setOnClickListener {
+            
+            scannerView.flash = !scannerView.flash
+            if (scannerView.flash) {
+                rightText.text = "关灯" 
+            } else {
+                rightText.text = "开灯"
+            }
+            
+        }
+        
+        val rightTextLp = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, resources.getDimensionPixelSize(R.dimen.app_dp_54))
+        rightTextLp.rightToRight = ConstraintLayout.LayoutParams.PARENT_ID
+        rightTextLp.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+        rightTextLp.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+        rightText.layoutParams = rightTextLp
+
+
+        appBarContentCl.addView(leftIcon)
+        appBarContentCl.addView(rightText)
+
+        appBarLayout.addView(appBarContentCl)
+
+
+        val scannerViewLp = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT)
+        scannerViewLp.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+        scannerViewLp.leftToLeft = ConstraintLayout.LayoutParams.PARENT_ID
+        scannerViewLp.rightToRight = ConstraintLayout.LayoutParams.PARENT_ID
+
+
+        scannerView.layoutParams = scannerViewLp
+
+        cl.addView(scannerView)
+        cl.addView(appBarLayout)
+
+        setContentView(cl)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

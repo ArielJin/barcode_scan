@@ -13,3 +13,4 @@ plugins.each { name, path ->
     include ":$name"
     project(":$name").projectDir = pluginDirectory
 }
+rootProject.name = 'package_barcode_scan'

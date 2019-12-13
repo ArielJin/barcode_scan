@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="scan_bar" type="id"/>
+
+    <item name="scan_bar_left_img" type="id"/>
+
+    <item name="scan_bar_right" type="id"/>
+
+</resources>

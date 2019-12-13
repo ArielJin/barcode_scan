@@ -24,16 +24,18 @@ class BarcodeScanPlugin(val activity: Activity): MethodCallHandler,
   }
 
   override fun onMethodCall(call: MethodCall, result: Result): Unit {
-    if (call.method.equals("scan")) {
+    if (call.method == "scan") {
       this.result = result
-      showBarcodeView()
+      showBarcodeView(call.argument<String>("appbar_color"))
     } else {
       result.notImplemented()
     }
   }
 
-  private fun showBarcodeView() {
+  private fun showBarcodeView(appbarColor: String?) {
     val intent = Intent(activity, BarcodeScannerActivity::class.java)
+    if (appbarColor?.isNotEmpty()!!) 
+      intent.putExtra(BarcodeScannerActivity.KEY_APPBAR_COLOR, appbarColor)
     activity.startActivityForResult(intent, 100)
   }
 

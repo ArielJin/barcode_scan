@@ -9,9 +9,9 @@ class BarcodeScanner {
   static const CameraAccessDenied = 'PERMISSION_NOT_GRANTED';
   static const MethodChannel _channel =
       const MethodChannel('com.apptreesoftware.barcode_scan');
-  static Future<ScanResult> scan() async {
+  static Future<ScanResult> scan({String appbarColor = "#FF000000"}) async {
 
-    var scanResult = await _channel.invokeMethod('scan');
+    var scanResult = await _channel.invokeMethod('scan', <String,dynamic>{'appbar_color':appbarColor});
     if(Platform.isAndroid) {
       /**
        * Android返回SCAN_RESULT 和 FORMAT
